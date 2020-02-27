@@ -19,7 +19,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  * the map. A Texture drawn using MapboxMap bitmap snapshots can then be shown instead of the
  * overlay.
  */
-public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks {
+public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks, FlutterPlugin, ActivityAware {
   static final int CREATED = 1;
   static final int STARTED = 2;
   static final int RESUMED = 3;
@@ -41,6 +41,46 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks 
             new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_gl");
     methodChannel.setMethodCallHandler(new GlobalMethodHandler(registrar));
   }
+
+  @Override
+  public void onAttachedToActivity(binding: ActivityPluginBinding) {
+    mActivity = binding.getActivity()
+    this.registrarActivityHashCode = registrar.activity().hashCode();
+    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(plugin);
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    mActivity = binding.getActivity()
+  }
+
+  @Override
+ public void onDetachedFromActivity() {
+    mActivity = null
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+    mActivity = null
+  }
+
+  @Override
+  public void onAttachedToEngine(FlutterPluginBinding binding) {
+    val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings")
+    channel.setMethodCallHandler(this)
+    // TODO registrar.activity().getApplication().registerActivityLifecycleCallbacks(plugin);
+    binding
+      .getPlatformViewRegistry()
+      .registerViewFactory(
+        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(state, registrar));
+
+    MethodChannel methodChannel =
+            new MethodChannel(binding.getBinaryMessenger(), "plugins.flutter.io/mapbox_gl");
+    methodChannel.setMethodCallHandler(new GlobalMethodHandler(binding));
+  }
+
+  @Override
+  public void onDetachedFromEngine(FlutterPluginBinding binding) {}
 
   @Override
   public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -92,9 +132,5 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks 
       return;
     }
     state.set(DESTROYED);
-  }
-
-  private MapboxMapsPlugin(Registrar registrar) {
-    this.registrarActivityHashCode = registrar.activity().hashCode();
   }
 }
