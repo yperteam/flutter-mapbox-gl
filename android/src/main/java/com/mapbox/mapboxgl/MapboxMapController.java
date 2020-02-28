@@ -141,7 +141,7 @@ final class MapboxMapController
     methodChannel =
       new MethodChannel(binding.getBinaryMessenger(), "plugins.flutter.io/mapbox_maps_" + id);
     methodChannel.setMethodCallHandler(this);
-    //this.registrarActivityHashCode = registrar.activity().hashCode();
+    this.registrarActivityHashCode = 0;
   }
 
   private static String getAccessToken(@NonNull Context context) {
