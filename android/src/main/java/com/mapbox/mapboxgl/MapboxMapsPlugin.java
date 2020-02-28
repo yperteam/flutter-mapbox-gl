@@ -30,7 +30,7 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   static final int STOPPED = 5;
   static final int DESTROYED = 6;
   private final AtomicInteger state = new AtomicInteger(0);
-  private final int registrarActivityHashCode;
+  private int registrarActivityHashCode;
   private Activity mActivity;
 
   @Override
