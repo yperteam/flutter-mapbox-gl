@@ -34,15 +34,13 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   private final int registrarActivityHashCode;
 
   @Override
-  public void onAttachedToActivity(binding: ActivityPluginBinding) {
-    mActivity = binding.getActivity()
+  public void onAttachedToActivity(ActivityPluginBinding binding) {
     this.registrarActivityHashCode = binding.getActivity().hashCode();
     binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
   }
 
   @Override
-  public void onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    mActivity = binding.getActivity()
+  public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
     this.registrarActivityHashCode = binding.getActivity().hashCode();
     binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
   }
@@ -50,19 +48,17 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   @Override
  public void onDetachedFromActivity() {
     binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
-    mActivity = null
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
-        binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
-    mActivity = null
+    binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {
-    val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings")
-    channel.setMethodCallHandler(this)
+    val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings");
+    channel.setMethodCallHandler(this);
     binding
       .getPlatformViewRegistry()
       .registerViewFactory(
