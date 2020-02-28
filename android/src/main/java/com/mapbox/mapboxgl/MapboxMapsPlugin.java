@@ -15,7 +15,6 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * Plugin for controlling a set of MapboxMap views to be shown as overlays on top of the Flutter
@@ -32,33 +31,38 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   static final int DESTROYED = 6;
   private final AtomicInteger state = new AtomicInteger(0);
   private final int registrarActivityHashCode;
+  private Activity mActivity;
 
   @Override
   public void onAttachedToActivity(ActivityPluginBinding binding) {
-    this.registrarActivityHashCode = binding.getActivity().hashCode();
-    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
+    mActivity = binding.getActivity();
+    this.registrarActivityHashCode = mActivity.hashCode();
+    mActivity.getApplication().registerActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-    this.registrarActivityHashCode = binding.getActivity().hashCode();
-    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
+    mActivity = binding.getActivity();
+    this.registrarActivityHashCode = mActivity.hashCode();
+    mActivity.getApplication().registerActivityLifecycleCallbacks(this);
   }
 
   @Override
  public void onDetachedFromActivity() {
-    binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
+   this.registrarActivityHashCode = null;
+   if (mActivity != null)
+      mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
-    binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
+    this.registrarActivityHashCode = null;
+    if (mActivity != null)
+      mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {
-    val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings");
-    channel.setMethodCallHandler(this);
     binding
       .getPlatformViewRegistry()
       .registerViewFactory(

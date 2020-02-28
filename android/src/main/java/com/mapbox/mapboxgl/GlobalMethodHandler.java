@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
 
 class GlobalMethodHandler implements MethodChannel.MethodCallHandler {
     private static final String TAG = GlobalMethodHandler.class.getSimpleName();
