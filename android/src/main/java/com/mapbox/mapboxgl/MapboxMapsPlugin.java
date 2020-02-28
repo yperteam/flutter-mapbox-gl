@@ -10,6 +10,10 @@ import android.os.Bundle;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
@@ -29,38 +33,29 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   private final AtomicInteger state = new AtomicInteger(0);
   private final int registrarActivityHashCode;
 
-  public static void registerWith(Registrar registrar) {
-    final MapboxMapsPlugin plugin = new MapboxMapsPlugin(registrar);
-    registrar.activity().getApplication().registerActivityLifecycleCallbacks(plugin);
-    registrar
-      .platformViewRegistry()
-      .registerViewFactory(
-        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(plugin.state, registrar));
-
-    MethodChannel methodChannel =
-            new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_gl");
-    methodChannel.setMethodCallHandler(new GlobalMethodHandler(registrar));
-  }
-
   @Override
   public void onAttachedToActivity(binding: ActivityPluginBinding) {
     mActivity = binding.getActivity()
-    this.registrarActivityHashCode = registrar.activity().hashCode();
-    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(plugin);
+    this.registrarActivityHashCode = binding.getActivity().hashCode();
+    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
     mActivity = binding.getActivity()
+    this.registrarActivityHashCode = binding.getActivity().hashCode();
+    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
   }
 
   @Override
  public void onDetachedFromActivity() {
+    binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
     mActivity = null
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
+        binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
     mActivity = null
   }
 
@@ -68,11 +63,10 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
   public void onAttachedToEngine(FlutterPluginBinding binding) {
     val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings")
     channel.setMethodCallHandler(this)
-    // TODO registrar.activity().getApplication().registerActivityLifecycleCallbacks(plugin);
     binding
       .getPlatformViewRegistry()
       .registerViewFactory(
-        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(state, registrar));
+        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(state, binding));
 
     MethodChannel methodChannel =
             new MethodChannel(binding.getBinaryMessenger(), "plugins.flutter.io/mapbox_gl");

@@ -74,6 +74,8 @@ import static com.mapbox.mapboxgl.MapboxMapsPlugin.RESUMED;
 import static com.mapbox.mapboxgl.MapboxMapsPlugin.STARTED;
 import static com.mapbox.mapboxgl.MapboxMapsPlugin.STOPPED;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
+
 /**
  * Controller of a single MapboxMaps MapView instance.
  */
@@ -96,7 +98,7 @@ final class MapboxMapController
   private final int id;
   private final AtomicInteger activityState;
   private final MethodChannel methodChannel;
-  private final PluginRegistry.Registrar registrar;
+  private final FlutterPluginBinding binding;
   private final MapView mapView;
   private MapboxMap mapboxMap;
   private final Map<String, SymbolController> symbols;
@@ -122,14 +124,14 @@ final class MapboxMapController
     int id,
     Context context,
     AtomicInteger activityState,
-    PluginRegistry.Registrar registrar,
+    FlutterPluginBinding binding,
     MapboxMapOptions options,
     String styleStringInitial) {
     Mapbox.getInstance(context, getAccessToken(context));
     this.id = id;
     this.context = context;
     this.activityState = activityState;
-    this.registrar = registrar;
+    this.binding = binding;
     this.styleStringInitial = styleStringInitial;
     this.mapView = new MapView(context, options);
     this.symbols = new HashMap<>();
@@ -137,9 +139,9 @@ final class MapboxMapController
     this.circles = new HashMap<>();
     this.density = context.getResources().getDisplayMetrics().density;
     methodChannel =
-      new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_maps_" + id);
+      new MethodChannel(binding.getBinaryMessenger(), "plugins.flutter.io/mapbox_maps_" + id);
     methodChannel.setMethodCallHandler(this);
-    this.registrarActivityHashCode = registrar.activity().hashCode();
+    //this.registrarActivityHashCode = registrar.activity().hashCode();
   }
 
   private static String getAccessToken(@NonNull Context context) {
@@ -201,7 +203,7 @@ final class MapboxMapController
         throw new IllegalArgumentException(
           "Cannot interpret " + activityState.get() + " as an activity state");
     }
-    registrar.activity().getApplication().registerActivityLifecycleCallbacks(this);
+    // TODO registrar.activity().getApplication().registerActivityLifecycleCallbacks(this);
     mapView.getMapAsync(this);
   }
 
@@ -683,7 +685,7 @@ final class MapboxMapController
     }
 
     mapView.onDestroy();
-    registrar.activity().getApplication().unregisterActivityLifecycleCallbacks(this);
+    // TODO registrar.activity().getApplication().unregisterActivityLifecycleCallbacks(this);
   }
 
   @Override
@@ -877,7 +879,7 @@ final class MapboxMapController
    * @return
    */
   private Bitmap getScaledImage(String imageId, float density) {
-    AssetManager assetManager = registrar.context().getAssets();
+    AssetManager assetManager = binding.getApplicationContext().getAssets();
     AssetFileDescriptor assetFileDescriptor = null;
 
     // Split image path into parts.
@@ -891,7 +893,7 @@ final class MapboxMapController
       String assetPath;
       if (i == 1) {
         // If density is 1.0x then simply take the default asset path
-        assetPath = registrar.lookupKeyForAsset(imageId);
+        assetPath = binding.getFlutterAssets().getAssetFilePathByName(imageId);
       } else {
         // Build a resolution aware asset path as follows:
         // <directory asset>/<ratio>/<image name>
@@ -904,7 +906,7 @@ final class MapboxMapController
         stringBuilder.append(((float) i) + "x");
         stringBuilder.append("/");
         stringBuilder.append(imagePathList.get(imagePathList.size()-1));
-        assetPath = registrar.lookupKeyForAsset(stringBuilder.toString());
+        assetPath = binding.getFlutterAssets().getAssetFilePathByName(stringBuilder.toString());
       }
       // Build up a list of resolution aware asset paths.
       assetPathList.add(assetPath);
