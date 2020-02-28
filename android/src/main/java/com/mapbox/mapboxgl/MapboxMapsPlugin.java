@@ -49,14 +49,14 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
 
   @Override
  public void onDetachedFromActivity() {
-   this.registrarActivityHashCode = null;
+   this.registrarActivityHashCode = 0;
    if (mActivity != null)
       mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
-    this.registrarActivityHashCode = null;
+    this.registrarActivityHashCode = 0;
     if (mActivity != null)
       mActivity.getApplication().unregisterActivityLifecycleCallbacks(this);
   }
