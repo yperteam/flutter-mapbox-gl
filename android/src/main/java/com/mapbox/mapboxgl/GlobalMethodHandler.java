@@ -22,10 +22,10 @@ class GlobalMethodHandler implements MethodChannel.MethodCallHandler {
     private static final String TAG = GlobalMethodHandler.class.getSimpleName();
     private static final String DATABASE_NAME = "mbgl-offline.db";
     private static final int BUFFER_SIZE = 1024 * 2;
-    private final PluginRegistry.Registrar registrar;
+    private final FlutterPluginBinding binding;
 
-    GlobalMethodHandler(PluginRegistry.Registrar registrar) {
-        this.registrar = registrar;
+    GlobalMethodHandler(FlutterPluginBinding binding) {
+        this.binding = binding;
     }
 
     @Override
@@ -43,7 +43,7 @@ class GlobalMethodHandler implements MethodChannel.MethodCallHandler {
     }
 
     private void installOfflineMapTiles(String tilesDb) {
-        final File dest = new File(registrar.activeContext().getFilesDir(), DATABASE_NAME);
+        final File dest = new File(binding.getApplicationContext().getFilesDir(), DATABASE_NAME);
         try (InputStream input = openTilesDbFile(tilesDb);
              OutputStream output = new FileOutputStream(dest)) {
             copy(input, output);
@@ -56,8 +56,8 @@ class GlobalMethodHandler implements MethodChannel.MethodCallHandler {
         if (tilesDb.startsWith("/")) { // Absolute path.
             return new FileInputStream(new File(tilesDb));
         } else {
-            final String assetKey = registrar.lookupKeyForAsset(tilesDb);
-            return registrar.activeContext().getAssets().open(assetKey);
+            final String assetKey = binding.getFlutterAssets().getAssetFilePathByName(tilesDb);
+            return binding.getApplicationContext().getAssets().open(assetKey);
         }
     }
 

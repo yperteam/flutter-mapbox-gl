@@ -10,6 +10,10 @@ import android.os.Bundle;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
@@ -19,7 +23,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  * the map. A Texture drawn using MapboxMap bitmap snapshots can then be shown instead of the
  * overlay.
  */
-public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks {
+public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks, FlutterPlugin, ActivityAware {
   static final int CREATED = 1;
   static final int STARTED = 2;
   static final int RESUMED = 3;
@@ -29,18 +33,48 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks 
   private final AtomicInteger state = new AtomicInteger(0);
   private final int registrarActivityHashCode;
 
-  public static void registerWith(Registrar registrar) {
-    final MapboxMapsPlugin plugin = new MapboxMapsPlugin(registrar);
-    registrar.activity().getApplication().registerActivityLifecycleCallbacks(plugin);
-    registrar
-      .platformViewRegistry()
+  @Override
+  public void onAttachedToActivity(binding: ActivityPluginBinding) {
+    mActivity = binding.getActivity()
+    this.registrarActivityHashCode = binding.getActivity().hashCode();
+    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    mActivity = binding.getActivity()
+    this.registrarActivityHashCode = binding.getActivity().hashCode();
+    binding.getActivity().getApplication().registerActivityLifecycleCallbacks(this);
+  }
+
+  @Override
+ public void onDetachedFromActivity() {
+    binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
+    mActivity = null
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+        binding.getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
+    mActivity = null
+  }
+
+  @Override
+  public void onAttachedToEngine(FlutterPluginBinding binding) {
+    val channel = MethodChannel(binding.getBinaryMessenger(), "app_settings")
+    channel.setMethodCallHandler(this)
+    binding
+      .getPlatformViewRegistry()
       .registerViewFactory(
-        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(plugin.state, registrar));
+        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(state, binding));
 
     MethodChannel methodChannel =
-            new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_gl");
-    methodChannel.setMethodCallHandler(new GlobalMethodHandler(registrar));
+            new MethodChannel(binding.getBinaryMessenger(), "plugins.flutter.io/mapbox_gl");
+    methodChannel.setMethodCallHandler(new GlobalMethodHandler(binding));
   }
+
+  @Override
+  public void onDetachedFromEngine(FlutterPluginBinding binding) {}
 
   @Override
   public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -92,9 +126,5 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks 
       return;
     }
     state.set(DESTROYED);
-  }
-
-  private MapboxMapsPlugin(Registrar registrar) {
-    this.registrarActivityHashCode = registrar.activity().hashCode();
   }
 }

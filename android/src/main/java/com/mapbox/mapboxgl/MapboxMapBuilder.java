@@ -13,7 +13,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.Style;
 
 import io.flutter.plugin.common.PluginRegistry;
-
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -29,9 +29,9 @@ class MapboxMapBuilder implements MapboxMapOptionsSink {
   private String styleString = Style.MAPBOX_STREETS;
 
   MapboxMapController build(
-    int id, Context context, AtomicInteger state, PluginRegistry.Registrar registrar) {
+    int id, Context context, AtomicInteger state, FlutterPluginBinding binding) {
     final MapboxMapController controller =
-      new MapboxMapController(id, context, state, registrar, options, styleString);
+      new MapboxMapController(id, context, state, binding, options, styleString);
     controller.init();
     controller.setMyLocationEnabled(myLocationEnabled);
     controller.setMyLocationTrackingMode(myLocationTrackingMode);

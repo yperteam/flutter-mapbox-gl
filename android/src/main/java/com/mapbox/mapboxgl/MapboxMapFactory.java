@@ -9,6 +9,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,12 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MapboxMapFactory extends PlatformViewFactory {
 
   private final AtomicInteger mActivityState;
-  private final Registrar mPluginRegistrar;
+  private final FlutterPluginBinding mBinding;
 
-  public MapboxMapFactory(AtomicInteger state, Registrar registrar) {
+  public MapboxMapFactory(AtomicInteger state, FlutterPluginBinding binding) {
     super(StandardMessageCodec.INSTANCE);
     mActivityState = state;
-    mPluginRegistrar = registrar;
+    mBinding = binding;
   }
 
   @Override
@@ -34,6 +35,6 @@ public class MapboxMapFactory extends PlatformViewFactory {
       CameraPosition position = Convert.toCameraPosition(params.get("initialCameraPosition"));
       builder.setInitialCameraPosition(position);
     }
-    return builder.build(id, context, mActivityState, mPluginRegistrar);
+    return builder.build(id, context, mActivityState, mBinding);
   }
 }
