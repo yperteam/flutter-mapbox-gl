@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
-import 'main.dart';
 import 'page.dart';
 
-class PlaceSymbolPage extends ExamplePage {
+class PlaceSymbolPage extends Page {
   PlaceSymbolPage() : super(const Icon(Icons.place), 'Place symbol');
 
   @override
@@ -38,35 +33,16 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   MapboxMapController controller;
   int _symbolCount = 0;
   Symbol _selectedSymbol;
-  bool _iconAllowOverlap = false;
 
   void _onMapCreated(MapboxMapController controller) {
     this.controller = controller;
     controller.onSymbolTapped.add(_onSymbolTapped);
   }
 
-  void _onStyleLoaded() {
-    addImageFromAsset("assetImage", "assets/symbols/custom-icon.png");
-    addImageFromUrl("networkImage", "https://via.placeholder.com/50");
-  }
-
   @override
   void dispose() {
     controller?.onSymbolTapped?.remove(_onSymbolTapped);
     super.dispose();
-  }
-
-  /// Adds an asset image to the currently displayed style
-  Future<void> addImageFromAsset(String name, String assetName) async {
-    final ByteData bytes = await rootBundle.load(assetName);
-    final Uint8List list = bytes.buffer.asUint8List();
-    return controller.addImage(name, list);
-  }
-
-  /// Adds a network image to the currently displayed style
-  Future<void> addImageFromUrl(String name, String url) async {
-    var response = await get(url);
-    return controller.addImage(name, response.bodyBytes);
   }
 
   void _onSymbolTapped(Symbol symbol) {
@@ -90,50 +66,18 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   }
 
   void _add(String iconImage) {
-    List<int> availableNumbers = Iterable<int>.generate(12).toList();
-    controller.symbols.forEach(
-            (s) => availableNumbers.removeWhere((i) => i == s.data['count'])
-    );
-    if (availableNumbers.isNotEmpty) {
-      controller.addSymbol(
-        _getSymbolOptions(iconImage, availableNumbers.first),
-        {'count': availableNumbers.first}
-      );
-      setState(() {
-        _symbolCount += 1;
-      });
-    }
-  }
-
-  SymbolOptions _getSymbolOptions(String iconImage, int symbolCount){
-    return SymbolOptions(
-      geometry: LatLng(
-        center.latitude + sin(symbolCount * pi / 6.0) / 20.0,
-        center.longitude + cos(symbolCount * pi / 6.0) / 20.0,
+    controller.addSymbol(
+      SymbolOptions(
+        geometry: LatLng(
+          center.latitude + sin(_symbolCount * pi / 6.0) / 20.0,
+          center.longitude + cos(_symbolCount * pi / 6.0) / 20.0,
+        ),
+        iconImage: iconImage,
       ),
-      iconImage: iconImage,
     );
-  }
-
-  Future<void> _addAll(String iconImage) async {
-    List<int> symbolsToAddNumbers = Iterable<int>.generate(12).toList();
-    controller.symbols.forEach(
-        (s) => symbolsToAddNumbers.removeWhere((i) => i == s.data['count'])
-    );
-    
-    if (symbolsToAddNumbers.isNotEmpty) {
-      final List<SymbolOptions> symbolOptionsList = symbolsToAddNumbers.map(
-        (i) => _getSymbolOptions(iconImage, i)
-      ).toList();
-      controller.addSymbols(
-        symbolOptionsList,
-          symbolsToAddNumbers.map((i) => {'count': i}).toList()
-      );
-  
-      setState(() {
-        _symbolCount += symbolOptionsList.length;
-      });
-    }
+    setState(() {
+      _symbolCount += 1;
+    });
   }
 
   void _remove() {
@@ -141,14 +85,6 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
     setState(() {
       _selectedSymbol = null;
       _symbolCount -= 1;
-    });
-  }
-
-  void _removeAll() {
-    controller.removeSymbols(controller.symbols);
-    setState(() {
-      _selectedSymbol = null;
-      _symbolCount = 0;
     });
   }
 
@@ -248,22 +184,6 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
     );
   }
 
-   void _getLatLng() async {
-    LatLng latLng = await controller.getSymbolLatLng(_selectedSymbol);
-    Scaffold.of(context).showSnackBar(
-      SnackBar(
-        content: Text(latLng.toString()),
-      ),
-    );
-  }
-
-  Future<void> _changeIconOverlap() async {
-    setState(() {
-      _iconAllowOverlap = !_iconAllowOverlap;
-    });
-    controller.setSymbolIconAllowOverlap(_iconAllowOverlap);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -275,9 +195,7 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
             width: 300.0,
             height: 200.0,
             child: MapboxMap(
-              accessToken: MapsDemo.ACCESS_TOKEN,
               onMapCreated: _onMapCreated,
-              onStyleLoadedCallback: _onStyleLoaded,
               initialCameraPosition: const CameraPosition(
                 target: LatLng(-33.852, 151.211),
                 zoom: 11.0,
@@ -300,11 +218,6 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                               (_symbolCount == 12) ? null : _add("airport-15"),
                         ),
                         FlatButton(
-                          child: const Text('add all'),
-                          onPressed: () =>
-                            (_symbolCount == 12) ? null : _addAll("airport-15"),
-                        ),
-                        FlatButton(
                           child: const Text('add (custom icon)'),
                           onPressed: () => (_symbolCount == 12)
                               ? null
@@ -313,26 +226,6 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                         FlatButton(
                           child: const Text('remove'),
                           onPressed: (_selectedSymbol == null) ? null : _remove,
-                        ),
-                        FlatButton(
-                          child:  Text('${_iconAllowOverlap ? 'disable' : 'enable'} icon overlap'),
-                          onPressed: _changeIconOverlap,
-                        ),
-                        FlatButton(
-                          child: const Text('remove all'),
-                          onPressed: (_symbolCount == 0) ? null : _removeAll,
-                        ),
-                        FlatButton(
-                          child: const Text('add (asset image)'),
-                          onPressed: () => (_symbolCount == 12)
-                              ? null
-                              : _add(
-                                  "assetImage"), //assetImage added to the style in _onStyleLoaded
-                        ),
-                        FlatButton(
-                          child: const Text('add (network image)'),
-                          onPressed: () =>
-                              (_symbolCount == 12) ? null : _add("networkImage"), //networkImage added to the style in _onStyleLoaded
                         ),
                       ],
                     ),
@@ -345,9 +238,8 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                         ),
                         FlatButton(
                           child: const Text('change icon offset'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _changeIconOffset,
+                          onPressed:
+                              (_selectedSymbol == null) ? null : _changeIconOffset,
                         ),
                         FlatButton(
                           child: const Text('change icon anchor'),
@@ -382,12 +274,6 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                           child: const Text('change zIndex'),
                           onPressed:
                               (_selectedSymbol == null) ? null : _changeZIndex,
-                        ),
-                        FlatButton(
-                          child: const Text('get current LatLng'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _getLatLng,
                         ),
                       ],
                     ),

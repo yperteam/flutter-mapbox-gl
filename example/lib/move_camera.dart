@@ -5,10 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
-import 'main.dart';
 import 'page.dart';
 
-class MoveCameraPage extends ExamplePage {
+class MoveCameraPage extends Page {
   MoveCameraPage() : super(const Icon(Icons.map), 'Camera control');
 
   @override
@@ -41,9 +40,7 @@ class MoveCameraState extends State<MoveCamera> {
             width: 300.0,
             height: 200.0,
             child: MapboxMap(
-              accessToken: MapsDemo.ACCESS_TOKEN,
               onMapCreated: _onMapCreated,
-              onCameraIdle: ()=>print("onCameraIdle"),
               initialCameraPosition:
                   const CameraPosition(target: LatLng(0.0, 0.0)),
             ),

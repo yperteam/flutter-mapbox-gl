@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of mapbox_gl_platform_interface;
+part of mapbox_gl;
 
 /// A pair of latitude and longitude coordinates, stored as degrees.
 class LatLng {
@@ -26,7 +26,7 @@ class LatLng {
   /// The longitude in degrees between -180.0 (inclusive) and 180.0 (exclusive).
   final double longitude;
 
-  dynamic toJson() {
+  dynamic _toJson() {
     return <double>[latitude, longitude];
   }
 
@@ -73,8 +73,8 @@ class LatLngBounds {
   /// The northeast corner of the rectangle.
   final LatLng northeast;
 
-  dynamic toList() {
-    return <dynamic>[southwest.toJson(), northeast.toJson()];
+  dynamic _toList() {
+    return <dynamic>[southwest._toJson(), northeast._toJson()];
   }
 
   @visibleForTesting
