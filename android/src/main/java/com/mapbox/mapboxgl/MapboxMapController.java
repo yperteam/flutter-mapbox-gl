@@ -431,6 +431,7 @@ final class MapboxMapController
       case "camera#move": {
         final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
         if (cameraUpdate != null) {
+          // camera transformation not handled yet
           mapboxMap.moveCamera(cameraUpdate, new OnCameraMoveFinishedListener(){
             @Override
             public void onFinish() {
@@ -453,7 +454,7 @@ final class MapboxMapController
       }
       case "camera#animate": {
         final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
-          final Integer duration = call.argument("duration");
+        final Integer duration = call.argument("duration");
 
         final OnCameraMoveFinishedListener onCameraMoveFinishedListener = new OnCameraMoveFinishedListener(){
           @Override
@@ -473,7 +474,7 @@ final class MapboxMapController
           mapboxMap.animateCamera(cameraUpdate, duration, onCameraMoveFinishedListener);
         } else if (cameraUpdate != null) {
           // camera transformation not handled yet
-           mapboxMap.animateCamera(cameraUpdate, onCameraMoveFinishedListener);
+          mapboxMap.animateCamera(cameraUpdate, onCameraMoveFinishedListener);
         } else {
           result.success(false);
         }
@@ -492,7 +493,6 @@ final class MapboxMapController
           jsonArray = jsonElement.getAsJsonArray();
         }
         Expression filterExpression = jsonArray == null ? null : Expression.Converter.convert(jsonArray);
-        String filter = (String) call.argument("filter");
         if (call.hasArgument("x")) {
           Double x = call.argument("x");
           Double y = call.argument("y");
