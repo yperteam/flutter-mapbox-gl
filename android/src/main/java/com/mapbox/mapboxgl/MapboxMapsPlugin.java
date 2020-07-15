@@ -45,6 +45,12 @@ public class MapboxMapsPlugin implements Application.ActivityLifecycleCallbacks,
     mActivity.getApplication().registerActivityLifecycleCallbacks(plugin);
     registrar
       .platformViewRegistry()
+      .registerViewFactory(
+        "plugins.flutter.io/mapbox_gl", new MapboxMapFactory(plugin.state, registrar));
+
+    MethodChannel methodChannel =
+            new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_gl");
+    methodChannel.setMethodCallHandler(new GlobalMethodHandler(registrar));
   }
 
   @Override
