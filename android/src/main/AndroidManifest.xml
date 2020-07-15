@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.mapbox.mapboxgl"
   xmlns:tools="http://schemas.android.com/tools">
-  <use tools:overrideLibrary="com.mapbox.mapboxgl">
+  <uses-sdk android:minSdkVersion="17" tools:overrideLibrary="com.mapbox.mapboxgl"/>
 </manifest>
