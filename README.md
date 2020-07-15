@@ -74,6 +74,22 @@ Support for offline maps is available by *"side loading"* the required map tiles
     }
 ```
 
+## Location features
+To enable location features in an **Android** application:
+
+You need to declare the `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION` permission in the AndroidManifest.xml and starting from Android API level 23 also request it at runtime. The plugin does not handle this for you. The example app uses the flutter ['location' plugin](https://pub.dev/packages/location) for this. 
+
+To enable location features in an **iOS** application:
+
+If you access your users' location, you should also add the following key to your Info.plist to explain why you need access to their location data:
+
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>[Your explanation here]</string>
+```
+
+Mapbox [recommends](https://docs.mapbox.com/help/tutorials/first-steps-ios-sdk/#display-the-users-location) the explanation "Shows your location on the map and helps improve the map".
+
 ## Documentation
 
 This README file currently houses all of the documentation for this Flutter project. Please visit [mapbox.com/android-docs](https://www.mapbox.com/android-docs/) if you'd like more information about the Mapbox Maps SDK for Android and [mapbox.com/ios-sdk](https://www.mapbox.com/ios-sdk/) for more information about the Mapbox Maps SDK for iOS.

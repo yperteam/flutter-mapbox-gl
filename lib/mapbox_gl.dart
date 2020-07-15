@@ -13,6 +13,26 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+export 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart'
+    show
+        LatLng,
+        LatLngBounds,
+        CameraPosition,
+        CameraUpdate,
+        ArgumentCallbacks,
+        Symbol,
+        SymbolOptions,
+        CameraTargetBounds,
+        MinMaxZoomPreference,
+        MapboxStyles,
+        MyLocationTrackingMode,
+        MyLocationRenderMode,
+        CompassViewPosition,
+        Circle,
+        CircleOptions,
+        Line,
+        LineOptions;
+
 part 'src/bitmap.dart';
 part 'src/callbacks.dart';
 part 'src/camera.dart';
