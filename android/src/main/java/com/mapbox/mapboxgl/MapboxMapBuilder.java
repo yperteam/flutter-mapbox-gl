@@ -15,6 +15,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 
